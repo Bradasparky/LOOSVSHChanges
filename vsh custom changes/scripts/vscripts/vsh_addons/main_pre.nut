@@ -10,6 +10,7 @@ this.Include <- function(path)
 
 	switch (path)
 	{
+		case "/_gamemode/forced_arena.nut": //Respawn/death loop fix.
 		case "__lizardlib/weapons.nut":
 		case "__lizardlib/game_events.nut":
 		case "__lizardlib/character_trait.nut":
