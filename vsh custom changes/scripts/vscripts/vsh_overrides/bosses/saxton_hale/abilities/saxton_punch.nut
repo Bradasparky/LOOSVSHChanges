@@ -10,6 +10,8 @@
 //  James McGuinn - Mercenaries voice acting for custom lines.
 //  Yakibomb - give_tf_weapon script bundle (used for Hale's first-person hands model).
 //  Phe - game design assistance.
+//  Senni - Crit Punch sfx warning code.
+// Bradasparky - Extender fixes, consolidated Crit Punch damage into one instance fix.
 //=========================================================================
 
 PrecacheArbitrarySound("vsh_sfx.saxton_punch");
@@ -25,12 +27,31 @@ class SaxtonPunchTrait extends BossTrait
     meter = -30;
     perform = true;
     playedWarning = false;
+    heardCapperCrit = null;
 
     function OnApply()
     {
         if (!(player in hudAbilityInstances))
             hudAbilityInstances[player] <- [];
         hudAbilityInstances[player].push(this);
+
+        heardCapperCrit = {};
+    }
+
+    function PlayCapperCritOncePerPlayer()
+    {
+        for (local i = 1; i <= MaxClients().tointeger(); i++)
+        {
+            local ply = PlayerInstanceFromIndex(i);
+            if (ply == null) continue;
+
+            local idx = ply.entindex();
+            if (!(idx in heardCapperCrit))
+            {
+                EmitSoundOnClient("Weapon_Capper.SingleCrit", ply);
+                heardCapperCrit[idx] <- true;
+            }
+        }
     }
 
 
@@ -40,7 +61,8 @@ class SaxtonPunchTrait extends BossTrait
             vsh_vscript.Hale_SetRedArm(boss, true);
             BossPlayViewModelAnim(boss, "vsh_megapunch_ready");
             boss.AddCond(TF_COND_CRITBOOSTED);
-            EmitSoundOn("Weapon_Capper.SingleCrit", boss) //sfx warning when it's fully charged.
+            heardCapperCrit = {}; // reset so the warning plays again for everyone on each new charge
+            PlayCapperCritOncePerPlayer(); //sfx warning when it's fully charged, once per player per charge.
         }
 
     function CritPunchVoiceline()
