@@ -7,7 +7,7 @@ Credits:
 
 Bradasparky, Horiuchi, Dice, Senni - Coding and Technical Assistance.
 
-Delfite - Assistance with the majority of Changes.
+Delfite - Assistance with the majority of changes.
 
 Pika - Top Damage Scoreboard script maker.
 
