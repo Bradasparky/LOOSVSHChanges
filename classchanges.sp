@@ -6,7 +6,7 @@
 #include <tf2>
 #include <tf2_stocks>
 
-#define PLUGIN_VERSION  "2.1"
+#define PLUGIN_VERSION  "2.2"
 #define MAX_LINE_LEN    96
 #define MAX_WEAPON_NAME 64
 
@@ -180,12 +180,41 @@ bool ClientHasAnyWeaponDef(int client, const int[] itemDefs, int count)
         if (weapon == -1 || !IsValidEntity(weapon))
             continue;
 
-        int def = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
-        for (int k = 0; k < count; k++)
-        {
-            if (def == itemDefs[k])
-                return true;
-        }
+        if (EntityMatchesDefs(weapon, itemDefs, count))
+            return true;
+    }
+
+    // Boots and shields (Gunboats, Chargin' Targe, Tide Turner, etc.) are wearables,
+    // not weapons, so they never appear in GetPlayerWeaponSlot().
+    if (ClientWearsAnyDef(client, "tf_wearable", itemDefs, count))
+        return true;
+    if (ClientWearsAnyDef(client, "tf_wearable_demoshield", itemDefs, count))
+        return true;
+
+    return false;
+}
+
+bool EntityMatchesDefs(int entity, const int[] itemDefs, int count)
+{
+    int def = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+    for (int k = 0; k < count; k++)
+    {
+        if (def == itemDefs[k])
+            return true;
+    }
+    return false;
+}
+
+bool ClientWearsAnyDef(int client, const char[] classname, const int[] itemDefs, int count)
+{
+    int ent = -1;
+    while ((ent = FindEntityByClassname(ent, classname)) != -1)
+    {
+        if (GetEntPropEnt(ent, Prop_Send, "m_hOwnerEntity") != client)
+            continue;
+
+        if (EntityMatchesDefs(ent, itemDefs, count))
+            return true;
     }
     return false;
 }
@@ -836,7 +865,7 @@ void ApplyDefindexOverrides()
     // Sniper
     int sniperrifleIds[] = { 14, 201, 664, 792, 801, 851, 881, 890, 899, 908, 957, 966, 15000, 15007, 15019, 15023, 15033, 15059, 15070, 15071, 15072, 15111, 15112, 15135, 15136, 15154 };
     int machinaIds[] = { 526, 30665 };
-    int huntsmanIds[] = { 56, 1101, 1092 };
+    int huntsmanIds[] = { 56, 1005, 1092 };
     int smgIds[] = { 16, 203, 1105, 1149, 15001, 15022, 15032, 15037, 15058, 15076, 15110, 15134, 15153 };
     int jarateIds[] = { 58, 1083 };
     int kukriIds[] = { 3, 193, 264, 423, 474, 880, 939, 954, 1013, 1071, 1123, 1127, 30758 };
